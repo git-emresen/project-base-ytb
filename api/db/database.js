@@ -12,9 +12,13 @@ class Database{
    }
 
    async connect(options){
+    try{
     let db=await mongoose.connect(options.CONNECTION_STRING)
     this.mongoConnection=db;
     console.log("Db conected..!")
+    }catch(eror){
+    console.log("Datebase connection error..")
+    }
    }
 }
 
