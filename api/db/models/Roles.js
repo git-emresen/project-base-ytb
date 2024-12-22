@@ -3,14 +3,13 @@ const RolePrivileges = require("./RolePrivileges");
 
 const schema = mongoose.Schema({
     role_name: { type: String, required: true, unique:true},
+    description: { type: String },
     is_active: { type: mongoose.Schema.Types.Boolean, default: true },
-    
-}, {
-    versionKey: false,
-    timestamps: {
     created_by: { type: mongoose.Schema.Types.ObjectId },
     updated_by: { type: mongoose.Schema.Types.ObjectId }
-    }
+}, {
+    versionKey: false,
+    timestamps: true
 });
 
 schema.index({ role_name: 1 }, { unique: true });
