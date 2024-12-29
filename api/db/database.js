@@ -1,4 +1,5 @@
-const mongoose=require('mongoose')
+const mongoose=require('mongoose');
+const Response=require('../lib/Response')
 
 let instance=null;
 
@@ -15,9 +16,10 @@ class Database{
     try{
     let db=await mongoose.connect(options.CONNECTION_STRING)
     this.mongoConnection=db;
-    console.log("Db conected..!")
-    }catch(eror){
-    console.log("Datebase connection error..")
+    console.log(`[Database connected to PORT ${db.connection.port}]`)
+    }catch(err){
+        let errResponse = Response.errorResponse(err);
+        console.log(errResponse);
     }
    }
 }

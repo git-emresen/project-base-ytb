@@ -1,5 +1,6 @@
 const bycrypt = require('bcrypt-nodejs');
 const is = require('is_js');
+const jwt=require('jwt-simple');
 
 var express = require('express');
 var router = express.Router();
@@ -9,10 +10,49 @@ var UserRoles=require("../db/models/UserRoles");
 var CustomError = require("../lib/Error");
 var Response = require("../lib/Response");
 var Enum = require("../config/Enum");
+const config=require('../config');
+const auth=require('../lib/auth.js')();
 
 
-/* GET users listing. */
-router.get('/', async function (req, res, next) {
+router.post('/register',async (req,res)=>{
+})
+
+router.post("/auth",async (req,res)=>{
+  try{
+   let {email,password}=req.body;
+   Users.validateFieldsBeforeAuth(email,password)
+
+   let user=await Users.findOne({email}) 
+
+   if(!user) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED,"Validation Error","Email or Password is wrong!")
+   if(!user.validPassword(password)) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED,"Validation Error","Email or Password is wrong!")
+  
+   let payload={
+    id:user._id,
+    exp:parseInt(Date.now()/1000)* config.JWT.EXPIRE_TIME
+   }
+ 
+   let token=jwt.encode(payload,config.JWT.SECRET)
+
+   let userData={
+    id:user._id,
+    first_name:user.first_name,
+    last_name:user.last_name
+   }
+   
+   res.json(Response.sucsessResponse({token,user:userData}));
+   
+  }catch(err){
+    let errorResponse = Response.errorResponse(err);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+})
+
+router.all("*",auth.authenticate(),(req,res,next)=>{
+  next();
+  })
+
+router.get('/', auth.checkRoles("user_view"), async function (req, res, next) {
   try{
     let users=await Users.find();
     if(users){
@@ -27,10 +67,7 @@ router.get('/', async function (req, res, next) {
   
 });
 
-//TODO:Bütün alanların doldurulduğunun kontrol edilmesi gerekli
-//BUG: Role id olmadığı hallerde user kaydı engellenmeli
-
-router.post('/add', async function (req, res, next) {
+router.post('/add',auth.checkRoles("user_add"), async function (req, res, next) {
   let body = req.body;
   try {
     if (!is.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "Fill the email field correctly")
@@ -69,7 +106,7 @@ router.post('/add', async function (req, res, next) {
   }
 });
 
-router.post('/update', async function (req, res, next) {
+router.post('/update',auth.checkRoles("user_update"), async function (req, res, next) {
   let body = req.body;
   let updates = {};
   try {
@@ -126,7 +163,7 @@ router.post('/update', async function (req, res, next) {
   }
 });
 
-router.post('/delete', async function (req, res, next) {
+router.post('/delete',auth.checkRoles("user_delete"), async function (req, res, next) {
   let body = req.body;
   try {
     if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be provided")
@@ -149,9 +186,5 @@ router.post('/delete', async function (req, res, next) {
   }
 });
 
-router.post('/register',async (req,res)=>{
-
-
-})
 
 module.exports = router;

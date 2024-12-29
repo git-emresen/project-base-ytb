@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const RolePrivileges = require("./RolePrivileges");
+const RolePrivileges = require("./RolePriviliges");
 
 const schema = mongoose.Schema({
     role_name: { type: String, required: true, unique:true},

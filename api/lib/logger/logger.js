@@ -15,6 +15,7 @@ const formats = format.combine(
   // format.prettyPrint(),
   // format.colorize({ all: true }),
 );
+/*
 
 if (config.LOGS.TRANSPORT == TRANSPORT.FILE) {
   console.log("Logs will be printed to File")
@@ -36,7 +37,7 @@ if (config.LOGS.TRANSPORT == TRANSPORT.FILE) {
   transports_list.push(transport)
 }
 console.log("LOG LEVEL ", config.LOGS.LEVEL)
-
+*/
 var logger = createLogger({
   level: config.LOGS.LEVEL,
   transports: transports_list
