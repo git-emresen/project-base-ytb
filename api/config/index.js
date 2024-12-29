@@ -1,9 +1,7 @@
 module.exports={
     "PORT":process.env.PORT || 3000,
     "LOG_LEVEL":process.env.LOG_LEVEL || "debug",
-<<<<<<< Updated upstream
-    "CONNECTION_STRING":process.env.CONNECTION_STRING || "mongodb://127.0.0.1:27017/project_base_ytb"
-=======
+
     "CONNECTION_STRING":process.env.CONNECTION_STRING || "mongodb://127.0.0.1:27018/project_base_ytb",
     "JWT":{
         "SECRET":"12356",
@@ -15,5 +13,5 @@ module.exports={
         MAX_FILE_SIZE: process.env.LOG_MAX_FILE_SIZE || "50m", // log file size
         MAX_FILES: process.env.LOG_MAX_FILES || "14d" // the number of days the logs will be stored
     }
->>>>>>> Stashed changes
+
 }   
