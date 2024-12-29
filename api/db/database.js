@@ -1,30 +1,30 @@
-const mongoose=require('mongoose');
-const Response=require('../lib/Response')
 
-let instance=null;
+const mongoose = require("mongoose");
+const logger = require("../lib/logger/loggerClass");
+mongoose.Promise = Promise;
 
-class Database{
-   constructor(){
-    if(!instance){
-        this.mongoConnection=null;
-        instance =this;
+let instance = null;
+
+class Database {
+    constructor() {
+        if (!instance) {
+            this.mongoConnection = null;
+            instance = this;
+        }
+        return instance;
     }
-    return instance;
-   }
 
-   async connect(options){
-    let db=await mongoose.connect(options.CONNECTION_STRING)
-    this.mongoConnection=db;
-<<<<<<< Updated upstream
-    console.log("Db conected..!")
-=======
-    console.log(`[Database connected to PORT ${db.connection.port}]`)
-    }catch(err){
-        let errResponse = Response.errorResponse(err);
-        console.log(errResponse);
+    async connect(options) {
+        try {
+            logger.info("-", "Mongo", "connect", "MongoDB Connecting...");
+            let db = await mongoose.connect(options.CONNECTION_STRING, { useNewUrlParser: true, useUnifiedTopology: true });
+
+            this.mongoConnection = db;
+            logger.info("-", "Mongo", "connect", "MongoDB Connection Established!");
+        } catch (err) {
+            logger.error("-", "Mongo", "connect", err);
+        }
     }
->>>>>>> Stashed changes
-   }
 }
 
-module.exports=Database;
+module.exports = Database;

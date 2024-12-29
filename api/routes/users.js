@@ -1,13 +1,3 @@
-<<<<<<< Updated upstream
-var express = require('express');
-var router = express.Router();
-
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
-
-=======
 const bycrypt = require('bcrypt-nodejs');
 const is = require('is_js');
 const jwt=require('jwt-simple');
@@ -197,5 +187,4 @@ router.post('/delete',auth.checkRoles("user_delete"), async function (req, res, 
 });
 
 
->>>>>>> Stashed changes
 module.exports = router;

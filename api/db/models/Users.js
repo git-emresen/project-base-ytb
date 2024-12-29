@@ -31,8 +31,4 @@ class Users extends mongoose.Model{
  }
 }
 schema.loadClass(Users);
-<<<<<<< Updated upstream
-module.exports=mongoose.model(users,schema)
-=======
 module.exports=mongoose.model("users",schema)
->>>>>>> Stashed changes

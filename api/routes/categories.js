@@ -1,7 +1,3 @@
-<<<<<<< Updated upstream
-const express=require('express')
-const router=express.Router()
-=======
 const express = require('express')
 const router = express.Router()
 const Categories = require('../db/models/Categories')
@@ -24,7 +20,7 @@ router.get("/",auth.checkRoles("category_view"), async (req, res, next) => {
         let errorResponse = Response.errorResponse(err)
         res.status(errorResponse.code).json(Response.errorResponse(err))
     }
->>>>>>> Stashed changes
+})
 
 router.get("/",(req,res,next)=>{
 res.json({
@@ -35,16 +31,12 @@ res.json({
 })
 })
 
-<<<<<<< Updated upstream
-=======
+
 router.post("/add",auth.checkRoles("category_add"), async (req, res, next) => {
     let body = req.body;
->>>>>>> Stashed changes
 
+    try{
 
-<<<<<<< Updated upstream
-module.exports=router;
-=======
         await category.save();
         AuditLogs.info(req.user?.email,"Categories","Add",category)
         logger.info(req.user?.email,"Categories","Add",category)
@@ -97,4 +89,3 @@ router.post("/delete",auth.checkRoles("category_delete"),async (req, res,) => {
 })
 
 module.exports = router;
->>>>>>> Stashed changes
