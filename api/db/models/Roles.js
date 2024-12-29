@@ -1,4 +1,8 @@
 const mongoose = require("mongoose");
+<<<<<<< Updated upstream
+=======
+const RolePrivileges = require("./RolePriviliges");
+>>>>>>> Stashed changes
 
 const schema = mongoose.Schema({
     role_name: { type: String, required: true },
