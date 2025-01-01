@@ -3,6 +3,7 @@ const is=require('is_js')
 const mongoose=require('mongoose');
 const { PASS_LENGTH, HTTP_CODES } = require('../../config/Enum');
 const CustomError = require('../../lib/Error');
+const { DEFAULT_LANG } = require('../../config');
 
 const schema=mongoose.Schema({
     email: { type: String, required: true },
@@ -11,6 +12,7 @@ const schema=mongoose.Schema({
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     phone_number: { type: String },
+    language:{type:String,default:DEFAULT_LANG}
 },{
     timestamps:{
         createdAt:"created_at",

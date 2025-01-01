@@ -1,91 +1,107 @@
-const express = require('express')
-const router = express.Router()
-const Categories = require('../db/models/Categories')
-const Response = require('../lib/Response.js')
-const CustomError = require('../lib/Error.js')
-const Enum = require("../config/Enum.js")
-const AuditLogs=require('../lib/AuditLogs.js')
-const logger=require('../lib/logger/loggerClass.js')
-const auth=require('../lib/auth.js')();
+var express = require('express');
+var router = express.Router();
+const Categories = require("../db/models/Categories");
+const Response = require("../lib/Response");
+const CustomError = require("../lib/Error");
+const Enum = require("../config/Enum");
+const AuditLogs = require("../lib/AuditLogs");
+const logger = require("../lib/logger/loggerClass");
+const config = require('../config');
+const auth = require("../lib/auth")();
+const i18n = new (require("../lib/i18n"))(config.DEFAULT_LANG);
 
-router.all("*",auth.authenticate(),(req,res,next)=>{
+/**
+ * Create
+ * Read
+ * Update
+ * Delete
+ * CRUD
+ */
+
+router.all("*", auth.authenticate(), (req, res, next) => {
     next();
-    })
+});
 
-router.get("/",auth.checkRoles("category_view"), async (req, res, next) => {
+/* GET categories listing. */
+router.get('/', auth.checkRoles("category_view"), async (req, res, next) => {
+
     try {
-        let categories = await Categories.find({})
-        res.json(Response.sucsessResponse(categories))
-    } catch (err) {
-        let errorResponse = Response.errorResponse(err)
-        res.status(errorResponse.code).json(Response.errorResponse(err))
-    }
-})
+        let categories = await Categories.find({});
 
-router.get("/",(req,res,next)=>{
-res.json({
-    body:req.body,
-    params:req.params,
-    query:req.query,
-    headers:req.headers
-})
-})
-
-
-router.post("/add",auth.checkRoles("category_add"), async (req, res, next) => {
-    let body = req.body;
-
-    try{
-
-        await category.save();
-        AuditLogs.info(req.user?.email,"Categories","Add",category)
-        logger.info(req.user?.email,"Categories","Add",category)
-        res.json(Response.sucsessResponse({ success: true }));
-
-    } catch (err) {
-        res.status(err.code || Enum.HTTP_CODES.INT_SERVER_ERROR).json(Response.errorResponse(err));
-        logger.err(req.user?.email,"Categories","Add",err)
-    }
-})
-
-router.post("/update",auth.checkRoles("category_update"), async (req, res) => {
-    let body = req.body;
-    try {
-        if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error", "Name field must be filled");
-
-        let updates = {}
-
-        if (body.name) updates.name = body.name;
-        if (typeof body.is_active === 'boolean') updates.is_active = body.is_active;
-
-        await Categories.updateOne({ _id: body._id }, updates);
-        AuditLogs.info(null,"Categories","Update",{_id:body._id, ...updates})
-       
-        res.json(Response.sucsessResponse({ success: true }))
+        res.json(Response.successResponse(categories));
 
     } catch (err) {
         let errorResponse = Response.errorResponse(err);
         res.status(errorResponse.code).json(Response.errorResponse(err));
     }
-})
+});
 
-router.post("/delete",auth.checkRoles("category_delete"),async (req, res,) => {
+router.post("/add" , auth.checkRoles("category_add") ,  async (req, res) => {
     let body = req.body;
     try {
 
-        if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error", "_id field must be provided");
+        if (!body.name) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["name"]));
 
-        const result =await Categories.deleteOne({ _id: body._id })
-        if (result.deletedCount === 0) { //TODO:BU DENETİMİ YAPMAZSAN DA HATA ALINCA CATCH KISMINDA HATA FIRLATABİLİR!
-            throw new CustomError(Enum.HTTP_CODES.NOT_FOUND, "Not Found", "No document found with the provided _id")
-        }
-        AuditLogs.info(req.user?.email,"Categories","delete",{_id:body._id})
-        res.json(Response.sucsessResponse({ success: true }));
+        let category = new Categories({
+            name: body.name,
+            is_active: true,
+            created_by: req.user?.id
+        });
+
+        await category.save();
+
+        AuditLogs.info(req.user?.email, "Categories", "Add", category);
+        logger.info(req.user?.email, "Categories", "Add", category);
+
+        res.json(Response.successResponse({ success: true }));
+
+    } catch (err) {
+        logger.error(req.user?.email, "Categories", "Add", err);
+        let errorResponse = Response.errorResponse(err);
+        res.status(errorResponse.code).json(errorResponse);
+    }
+});
+
+router.post("/update", auth.checkRoles("category_update"), async (req, res) => {
+    let body = req.body;
+    try {
+
+        if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["_id"]));
+
+        let updates = {};
+
+        if (body.name) updates.name = body.name;
+        if (typeof body.is_active === "boolean") updates.is_active = body.is_active;
+
+        await Categories.updateOne({ _id: body._id }, updates);
+
+        AuditLogs.info(req.user?.email, "Categories", "Update", { _id: body._id, ...updates });
+
+        res.json(Response.successResponse({ success: true }));
 
     } catch (err) {
         let errorResponse = Response.errorResponse(err);
         res.status(errorResponse.code).json(errorResponse);
     }
+})
+
+router.post("/delete", auth.checkRoles("category_delete"), async (req, res) => {
+    let body = req.body;
+
+    try {
+        if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["_id"]));
+
+        await Categories.remove({ _id: body._id });
+
+        AuditLogs.info(req.user?.email, "Categories", "Delete", { _id: body._id });
+
+        res.json(Response.successResponse({ success: true }));
+
+    } catch (err) {
+        let errorResponse = Response.errorResponse(err);
+        res.status(errorResponse.code).json(errorResponse);
+    }
+
 })
 
 module.exports = router;

@@ -1,45 +1,21 @@
-//const { createLogger, format, transports } = require("winston");
+const { format, createLogger, transports } = require("winston");
 
-const { transports, createLogger, format } = require('winston');
-var config = require("../../config")
-const { TRANSPORT } = require("../../config/Enum.js");
-require('winston-daily-rotate-file');
+const { LOG_LEVEL } = require("../../config");
 
-let transports_list = []
-//console.log("T type , ", config.LOGS.TRANSPORT)
 const formats = format.combine(
-  format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-  format.simple(),
-  format.splat(),
-  format.printf(info => (config.LOGS.LOG_FORMAT == "JSON") ? `${info.timestamp} ${info.level.toUpperCase()}: ${JSON.stringify(info.message)}` : `${info.timestamp} ${info.level.toUpperCase()}: [userid:${info.message.userId}] [client:${info.message.client}] [location:${info.message.location}] [procType:${info.message.procType}] [log:${info.message.log}] [processId:${info.message.processId}]`),
-  // format.prettyPrint(),
-  // format.colorize({ all: true }),
-);
+    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
+    format.simple(),
+    format.splat(),
+    format.printf(info => `${info.timestamp} ${info.level.toUpperCase()}: [email:${info.message.email}] [location:${info.message.location}] [procType:${info.message.proc_type}] [log:${info.message.log}]`)
+)
 
-if (config.LOGS.TRANSPORT == TRANSPORT.FILE) {
-  console.log("Logs will be printed to File")
-  let transport = new (transports.DailyRotateFile)({
-    format: formats,
-    filename: config.PATHS.LOG_PATH + 'app-%DATE%.log',
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: config.LOGS.MAX_FILE_SIZE,
-    maxFiles: config.LOGS.MAX_FILES
-  });
-  transports_list.push(transport)
-} else {
-  console.log("Logs will be printed to console")
-  let transport = new (transports.Console)({
-    format: formats,
-    // colorize: true
-  });
-  transports_list.push(transport)
-}
-console.log("LOG LEVEL ", config.LOGS.LEVEL)
+// 2023-05-04 12:12:12 INFO: [email:asd] [location:asd] [procType:asd] [log:{}]
 
-var logger = createLogger({
-  level: config.LOGS.LEVEL,
-  transports: transports_list
+const logger = createLogger({
+    level: LOG_LEVEL,
+    transports: [
+        new (transports.Console)({ format: formats })
+    ]
 });
 
 module.exports = logger;
