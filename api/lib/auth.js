@@ -87,7 +87,7 @@ module.exports = function () {
         }
 
         let priviliges = req.user.roles.map(x => x.key);
-        console.log('Privileges:', priviliges);
+       /*  console.log('Privileges:', priviliges); */
 
         let hasPermission = expectedRoles.some(role => priviliges.includes(role));
         if (!hasPermission) {
