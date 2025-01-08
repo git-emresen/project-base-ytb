@@ -26,6 +26,7 @@ module.exports = function () {
       if (user) {
 
         let userRoles = await UserRoles.find({ user_id: payload.id });
+        
         if (!userRoles || userRoles.length === 0) {
           console.error('No roles found for user');
           return done(new Error('User roles not found'), null);

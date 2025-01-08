@@ -9,7 +9,9 @@ const logger = require("../lib/logger/loggerClass");
 const config = require('../config');
 const auth = require("../lib/auth")();
 const i18n = new (require("../lib/i18n"))(config.DEFAULT_LANG);
-const emitter=require("../lib/Emitter");
+const emitter = require("../lib/Emitter");
+const excelExport = new (require("../lib/Export.js"))();
+const fs=require('fs');
 
 /**
  * Create
@@ -37,7 +39,7 @@ router.get('/', auth.checkRoles("category_view"), async (req, res, next) => {
     }
 });
 
-router.post("/add" , auth.checkRoles("category_add") ,  async (req, res) => {
+router.post("/add", auth.checkRoles("category_add"), async (req, res) => {
     let body = req.body;
     try {
 
@@ -53,7 +55,7 @@ router.post("/add" , auth.checkRoles("category_add") ,  async (req, res) => {
 
         AuditLogs.info(req.user?.email, "Categories", "Add", category);
         logger.info(req.user?.email, "Categories", "Add", category);
-        emitter.getEmitter("notifications").emit("messages",{message:category.name + "is added!"});
+        emitter.getEmitter("notifications").emit("messages", { message: category.name + "is added!" });
 
         res.json(Response.successResponse({ success: true }));
 
@@ -85,7 +87,7 @@ router.post("/update", auth.checkRoles("category_update"), async (req, res) => {
         let errorResponse = Response.errorResponse(err);
         res.status(errorResponse.code).json(errorResponse);
     }
-})
+});
 
 router.post("/delete", auth.checkRoles("category_delete"), async (req, res) => {
     let body = req.body;
@@ -104,6 +106,29 @@ router.post("/delete", auth.checkRoles("category_delete"), async (req, res) => {
         res.status(errorResponse.code).json(errorResponse);
     }
 
-})
+});
+
+router.get('/export', /* auth.checkRoles("category_export" ),*/ async (req, res, next) => {
+
+    try {
+        let categories = await Categories.find({});
+
+        let excel = excelExport.toExcel(
+            ["NAME", "IS_ACTIVE", "USER_ID", "CREATED_AT", "UPDATED_AT"],
+            ["name", "is_active", "created_by", "created_at", "updated_at"],
+            categories
+        )
+        let filePath = __dirname + "/../tmp/cat" + Date.now()+".xlsx"; 
+        console.log(filePath)
+        fs.writeFileSync(filePath, excel, "UTF-8");
+        res.download(filePath);
+        /* fs.unlinkSync(filePath); */
+
+    } catch (err) {
+        let errorResponse = Response.errorResponse(err);
+        res.status(errorResponse.code).json(Response.errorResponse(err));
+    }
+});
+
 
 module.exports = router;

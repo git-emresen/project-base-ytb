@@ -10,6 +10,10 @@ translate(text,lang=this.lang,params=[]){
 let arr=text.split(".");
 let val=i18n[lang][arr[0]];
 
+if(!params){
+    params=[1]
+}
+
 for(let i=1;i<arr.length;i++){
     val=val[arr[i]];
 }
