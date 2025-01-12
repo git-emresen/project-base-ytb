@@ -54,7 +54,7 @@ router.all("*", auth.authenticate(), (req, res, next) => {
 
 router.get('/', auth.checkRoles("user_view"), async function (req, res, next) {
   try {
-    let users = await Users.find();
+    let users = await Users.find({},{password:0});
     if (users) {
       res.json({ success: true, data: users });
     }
