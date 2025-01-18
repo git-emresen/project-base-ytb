@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
+const Users=require("./Users");
+const Roles=require("./Roles");
 
 const schema = mongoose.Schema({
-    role_id: { type: mongoose.Schema.Types.ObjectId },
-    user_id: { type: mongoose.Schema.Types.ObjectId },
+    role_id: { type: mongoose.Schema.Types.ObjectId,requird:true,ref:Roles },
+    user_id: { type: mongoose.Schema.Types.ObjectId,required:true,ref:Users },
     created_by: { type: mongoose.Schema.Types.ObjectId },
     updated_by: { type: mongoose.Schema.Types.ObjectId }
 }, {
